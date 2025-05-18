@@ -25,7 +25,8 @@ typedef struct {
 Tile grid[GRID_SIZE][GRID_SIZE] = {0};
 
 void gameLoop(void);
-void throughArray(int i, int j, Vector2 mPos);
+void drawTile(Tile* t, int posX, int posY, bool isHovered);
+void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered);
 
 int main(void) {
     srand((unsigned int)time(NULL));
@@ -34,7 +35,7 @@ int main(void) {
 
     for (int i = 0; i < GRID_SIZE; i++)
         for (int j = 0; j < GRID_SIZE; j++)
-            grid[i][j].state = rand() % 2;
+            grid[i][j].isMine = rand() % 2;
             
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -49,43 +50,53 @@ int main(void) {
 void gameLoop(void) {
     ClearBackground(BLACK);
     Vector2 mPos = GetMousePosition();
+    int mPosX = mPos.x;
+    int mPosY = mPos.y;
+    bool isLeftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+    bool isRightPressed = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
 
     for (int i = 0; i < GRID_SIZE; i++) {
         for (int j = 0; j < GRID_SIZE; j++) {
-            throughArray(i, j, mPos);
+            Tile* t = &grid[i][j];
+            int posX = i * TILE_SIZE;
+            int posY = j * TILE_SIZE;
+            bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
+            updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
+            drawTile(t, posX, posY, isHovered);
         }
     } 
 }
 
-void throughArray(int i, int j, Vector2 mPos) {
+void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered) {
+    
+    if(isHovered) {
+        if (isRightPressed){
+            if (t->state == TILE_CLOSE)
+                t->state = TILE_FLAG;
+            else if (t->state == TILE_FLAG)
+                t->state = TILE_CLOSE;
+        }
+    }
+}
+
+void drawTile(Tile* t, int posX, int posY, bool isHovered) {
     Color color = BLACK;
-        switch (grid[i][j].state) {
-        case TILE_CLOSE:
-            color = WHITE;
-            break;
-        case TILE_OPEN:
-            color = ORANGE;
-            break;
-        case TILE_FLAG:
-            color = GREEN;
-            break;
-        }
+    switch (t->state) {
+    case TILE_CLOSE:
+        color = WHITE;
+        break;
+    case TILE_OPEN:
+        color = ORANGE;
+        break;
+    case TILE_FLAG:
+        color = GREEN;
+        break;
+    }
 
-        int posX = i * TILE_SIZE;
-        int posY = j * TILE_SIZE;
-        int mPosX = mPos.x;
-        int mPosY = mPos.y;
-
-        if (mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE) {
-            color = RED;
-        }
+    if (isHovered) {
+        color = RED;
+    }
         
-        if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-            if (mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY &&
-                 mPosY < posY + TILE_SIZE && grid[i][j].state == TILE_CLOSE) {
-                grid[i][j].state = TILE_FLAG;
-        }
-        }
-        DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
-        DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
+    DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
+    DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
 }

@@ -1,2 +1,5 @@
 raylib
 build/*.exe
+build/*.pdb
+build/*.ilk
+build/*.o
