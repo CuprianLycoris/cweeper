@@ -45,7 +45,7 @@ int main(void) {
     jackTextures[0] = LoadTexture("./assets/jack0.png");
     jackTextures[1] = LoadTexture("./assets/jack1.png");
     Music jackMusic = LoadMusicStream("./assets/JackTheKiller.mp3");
-    // jackMusic.looping = true;
+    jackMusic.looping = true;
     
     bool permutuationArray[GRID_SIZE * GRID_SIZE] = {0};
     for (int i = 0; i < MINE_COUNT; i++){
