@@ -36,14 +36,24 @@ int main(void) {
 
     InitWindow(WIDTH, HEIGHT, "minecweeper");
 
+    bool permutuationArray[GRID_SIZE * GRID_SIZE] = {0};
+    for (int i = 0; i < MINE_COUNT; i++){
+        permutuationArray[i] = 1;
+    }
+    for (unsigned int shuffle = 0; shuffle < GRID_SIZE * GRID_SIZE; shuffle++){
+        int random = rand() % (GRID_SIZE * GRID_SIZE);
+        int random2 = rand() % (GRID_SIZE * GRID_SIZE);
+        bool tmp = 0;
+        tmp = permutuationArray[random];
+        permutuationArray[random] = permutuationArray[random2];
+        permutuationArray[random2] = tmp;
+    }
+
+
     // Prepare the game area
-    int mineCount = 0;
     for (int i = 0; i < GRID_SIZE; i++)
         for (int j = 0; j < GRID_SIZE; j++){
-            if (mineCount < MINE_COUNT) {
-                grid[i][j].isMine = ((rand() % MINE_COUNT) < MINE_COUNT/3);
-                mineCount++;
-            }      
+            grid[i][j].isMine = permutuationArray[i * GRID_SIZE + j];    
         }
             
     countNbors();
@@ -111,16 +121,18 @@ void drawTile(Tile* t, int posX, int posY, bool isHovered) {
         color = GREEN;
         break;
     }
+    #if 0 //if you want to display the mines
+        if (t->isMine) {
+            color = ORANGE;
+        } else {
+            color = WHITE;
+        }
 
-    // if (t->isMine) {
-    //     color = ORANGE;
-    // } else {
-    //     color = WHITE;
-    // }
-
-    if (isHovered) {
-        color = RED;
-    }
+        if (isHovered) {
+            color = RED;
+        }
+    #endif
+    
      
     DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
     DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
