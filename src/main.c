@@ -1,14 +1,26 @@
-#include <stdio.h>
 #include "raylib.h"
-#include "ui.h"
 
-int main() {
+typedef enum {
+    TILE_CLOSE,
+    TILE_OPEN,
+    TILE_FLAG
+} TileState;
+
+typedef struct {
+    bool isMine;
+    TileState state;
+} Tile;
+
+#define GRID_SIZE 16
+
+int main(void) {
     InitWindow(800, 600, "gay sex");
+    Tile grid[GRID_SIZE][GRID_SIZE] = {0};
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RED);
-        DrawText("butt sex", 10, 100, 30, WHITE);
+        
         EndDrawing();
     }
 
