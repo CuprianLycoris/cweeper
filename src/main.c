@@ -104,16 +104,20 @@ void drawTile(Tile* t, int posX, int posY, bool isHovered) {
         
     DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
     DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
+    char c[2];
+    if (t->state == TILE_OPEN && !t->isMine) {
+        sprintf(c, "%d", t->mineNbors);
+        DrawText(c, posX, posY, 15, BLACK);
+    }
 }
 
-void countNbors(void){
+void countNbors(void) {
   for (int i = 0; i < GRID_SIZE; i++) 
         for (int j = 0; j < GRID_SIZE; j++) 
             if(!grid[i][j].isMine)
-            for (int k = i - 1; k < i + 2; k++)
-                for (int l = j - 1; l < j + 2; l++)
-                    if((k >= 0 && k < GRID_SIZE) && (l >= 0 && l < GRID_SIZE))
-                        if(grid[k][l].isMine)
-                            grid[i][j].mineNbors++;                   
-
+                for (int k = i - 1; k < i + 2; k++)
+                    for (int l = j - 1; l < j + 2; l++)
+                        if((k >= 0 && k < GRID_SIZE) && (l >= 0 && l < GRID_SIZE))
+                            if(grid[k][l].isMine)
+                                grid[i][j].mineNbors++;
 }
