@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <time.h>
 #include "raylib.h"
 
 typedef enum {
@@ -18,12 +19,13 @@ typedef struct {
 #define HEIGHT GRID_SIZE * TILE_SIZE
 
 int main(void) {
+    srand((unsigned int)time(NULL));
     InitWindow(WIDTH, HEIGHT, "cweeper");
     Tile grid[GRID_SIZE][GRID_SIZE] = {0};
 
-        for (int i = 0; i < GRID_SIZE; i++)
-            for (int j = 0; j < GRID_SIZE; j++)
-             grid[i][j].state = rand() % 2;
+    for (int i = 0; i < GRID_SIZE; i++)
+        for (int j = 0; j < GRID_SIZE; j++)
+            grid[i][j].state = rand() % 2;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
