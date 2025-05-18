@@ -25,15 +25,19 @@ typedef struct {
 
 // Empty the playing field
 Tile grid[GRID_SIZE][GRID_SIZE] = {0};
+bool firstClick = true;
 
 bool gameLoop(void);
 void drawTile(Tile* t, int posX, int posY, bool isHovered);
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered);
 void openTile(int i, int j);
 void countNbors(void);
+void generateGrid(void);
 
 int main(void) {
     srand((unsigned int)time(NULL));
+    generateGrid();
+    
     bool jack = off;
     int currentJack = 0;
     float jackTimeDur = 0;
@@ -46,30 +50,7 @@ int main(void) {
     jackTextures[1] = LoadTexture("./assets/jack1.png");
     Music jackMusic = LoadMusicStream("./assets/JackTheKiller.mp3");
     jackMusic.looping = true;
-    
-    bool permutuationArray[GRID_SIZE * GRID_SIZE] = {0};
-    for (int i = 0; i < MINE_COUNT; i++){
-        permutuationArray[i] = 1;
-    }
-    for (unsigned int shuffle = 0; shuffle < GRID_SIZE * GRID_SIZE; shuffle++){
-        int random = rand() % (GRID_SIZE * GRID_SIZE);
-        int random2 = rand() % (GRID_SIZE * GRID_SIZE);
-        bool tmp = 0;
-        tmp = permutuationArray[random];
-        permutuationArray[random] = permutuationArray[random2];
-        permutuationArray[random2] = tmp;
-    }
 
-
-    // Prepare the game area
-    for (int i = 0; i < GRID_SIZE; i++)
-        for (int j = 0; j < GRID_SIZE; j++){
-            grid[i][j].isMine = permutuationArray[i * GRID_SIZE + j];    
-        }
-            
-    countNbors();
-
-            
     while (!WindowShouldClose()) {
         BeginDrawing();
         if (!jack){
@@ -120,6 +101,13 @@ bool gameLoop(void) {
             int posY = j * TILE_SIZE;
             bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
             if (isHovered && isLeftPressed) {
+                while (firstClick) {
+                    if (t->mineNbors == 0) {
+                        firstClick = false;
+                    } else {
+                        generateGrid();
+                    }
+                }
                 if (t->isMine) {
                     return false;
                 } else {
@@ -199,7 +187,8 @@ void openTile(int i, int j) {
 
 void countNbors(void) {
   for (int i = 0; i < GRID_SIZE; i++) 
-        for (int j = 0; j < GRID_SIZE; j++) 
+        for (int j = 0; j < GRID_SIZE; j++){
+            grid[i][j].mineNbors = 0;
             if(!grid[i][j].isMine) {
                 for (int k = i - 1; k < i + 2; k++)
                     for (int l = j - 1; l < j + 2; l++)
@@ -209,4 +198,29 @@ void countNbors(void) {
             } else {
                 grid[i][j].mineNbors = 1;
             }
+        }
+}
+
+void generateGrid(void) {
+    bool permutuationArray[GRID_SIZE * GRID_SIZE] = {0};
+    for (int i = 0; i < MINE_COUNT; i++){
+        permutuationArray[i] = 1;
+    }
+    for (unsigned int shuffle = 0; shuffle < GRID_SIZE * GRID_SIZE; shuffle++){
+        int random = rand() % (GRID_SIZE * GRID_SIZE);
+        int random2 = rand() % (GRID_SIZE * GRID_SIZE);
+        bool tmp = 0;
+        tmp = permutuationArray[random];
+        permutuationArray[random] = permutuationArray[random2];
+        permutuationArray[random2] = tmp;
+    }
+
+    // Prepare the game area
+    for (int i = 0; i < GRID_SIZE; i++) {
+        for (int j = 0; j < GRID_SIZE; j++){
+            grid[i][j].isMine = permutuationArray[i * GRID_SIZE + j];    
+        }
+    }
+    countNbors();
+    
 }
