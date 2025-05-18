@@ -51,6 +51,7 @@ int main(void) {
     Music jackMusic = LoadMusicStream("./assets/JackTheKiller.mp3");
     jackMusic.looping = true;
 
+    SetTargetFPS(144);
     while (!WindowShouldClose()) {
         BeginDrawing();
         if (!jack){
