@@ -1,7 +1,17 @@
 #include <stdio.h>
+#include "raylib.h"
 #include "ui.h"
 
 int main() {
-    printf("serdar is my girl\n");
+    InitWindow(800, 600, "gay sex");
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RED);
+        DrawText("butt sex", 10, 100, 30, WHITE);
+        EndDrawing();
+    }
+
+    CloseWindow();
     return 0;
 }
