@@ -29,17 +29,23 @@ int main(void) {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        for (int i = 0; i < GRID_SIZE; i++){
-            for (int j = 0; j < GRID_SIZE; j++)
-            {
-                if (grid[i][j].state == TILE_CLOSE)
-                {
-                DrawRectangle(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, WHITE);
+
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                Color color = BLACK;
+                switch (grid[i][j].state) {
+                case TILE_CLOSE:
+                    color = WHITE;
+                    break;
+                case TILE_OPEN:
+                    color = ORANGE;
+                    break;
+                case TILE_FLAG:
+                    color = GREEN;
+                    break;
                 }
-                else if(grid[i][j].state == TILE_OPEN)
-                {
-                    DrawRectangle(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, ORANGE);
-                }
+                DrawRectangle(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, color);
+                DrawRectangleLines(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, BLACK);
             }
         }
         
