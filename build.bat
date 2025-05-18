@@ -1,1 +1,1 @@
-clang -I./src/ -Wall -std=c99 src/main.c -o build/main.exe
+clang -Isrc/ -Iraylib/include/ -Wall -std=c99 src/main.c -o build/main.exe -Lraylib/lib -lraylib -lwinmm -lopengl32 -lgdi32 -luser32 -lkernel32 -Xlinker /NODEFAULTLIB -lmsvcrt -lucrt -lmsvcprt -lvcruntime -lshell32
