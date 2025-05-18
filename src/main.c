@@ -21,9 +21,11 @@ typedef struct {
 #define WIDTH GRID_SIZE * TILE_SIZE
 #define HEIGHT GRID_SIZE * TILE_SIZE
 #define MINE_COUNT 40
+#define off 0
 
 // Empty the playing field
 Tile grid[GRID_SIZE][GRID_SIZE] = {0};
+bool jack = off;
 
 void gameLoop(void);
 void drawTile(Tile* t, int posX, int posY, bool isHovered);
@@ -77,23 +79,29 @@ void gameLoop(void) {
     bool isLeftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     bool isRightPressed = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
 
-    for (int i = 0; i < GRID_SIZE; i++) {
-        for (int j = 0; j < GRID_SIZE; j++) {
-            Tile* t = &grid[i][j];
-            int posX = i * TILE_SIZE;
-            int posY = j * TILE_SIZE;
-            bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
-            if (isHovered && isLeftPressed) {
-                if (t->isMine) {
-                    // Lose
-                } else {
-                    openTile(i, j);
+    if (!jack) {
+        // In game
+        for (int i = 0; i < GRID_SIZE; i++) {
+            for (int j = 0; j < GRID_SIZE; j++) {
+                Tile* t = &grid[i][j];
+                int posX = i * TILE_SIZE;
+                int posY = j * TILE_SIZE;
+                bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
+                if (isHovered && isLeftPressed) {
+                    if (t->isMine) {
+                        jack = true;
+                    } else {
+                        openTile(i, j);
+                    }
                 }
+                updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
+                drawTile(t, posX, posY, isHovered);
             }
-            updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
-            drawTile(t, posX, posY, isHovered);
         }
-    } 
+    } else {
+        // Lose screen
+        DrawText("You lost!", WIDTH/2, HEIGHT/2 - 16, 32, WHITE);
+    }
 }
 
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered) {
