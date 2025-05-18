@@ -10,6 +10,7 @@ typedef enum {
 
 typedef struct {
     bool isMine;
+    int mineNbors;
     TileState state;
 } Tile;
 
@@ -30,7 +31,7 @@ int main(void) {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-
+        Vector2 mPos = GetMousePosition();
 
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
@@ -46,8 +47,15 @@ int main(void) {
                     color = GREEN;
                     break;
                 }
-                DrawRectangle(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, color);
-                DrawRectangleLines(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE, BLACK);
+                int posX = i * TILE_SIZE;
+                int posY = j * TILE_SIZE;
+                int mPosX = mPos.x;
+                int mPosY = mPos.y;
+                if (mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE) {
+                    color = RED;
+                }
+                DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
+                DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
             }
         }
         
