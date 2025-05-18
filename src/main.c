@@ -27,15 +27,20 @@ Tile grid[GRID_SIZE][GRID_SIZE] = {0};
 void gameLoop(void);
 void drawTile(Tile* t, int posX, int posY, bool isHovered);
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered);
+void countNbors(void);
 
 int main(void) {
     srand((unsigned int)time(NULL));
 
     InitWindow(WIDTH, HEIGHT, "minecweeper");
 
+    // Prepare the game area
     for (int i = 0; i < GRID_SIZE; i++)
         for (int j = 0; j < GRID_SIZE; j++)
             grid[i][j].isMine = rand() % 2;
+            
+    countNbors();
+
             
     while (!WindowShouldClose()) {
         BeginDrawing();
@@ -99,4 +104,16 @@ void drawTile(Tile* t, int posX, int posY, bool isHovered) {
         
     DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
     DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
+}
+
+void countNbors(void){
+  for (int i = 0; i < GRID_SIZE; i++) 
+        for (int j = 0; j < GRID_SIZE; j++) 
+            if(!grid[i][j].isMine)
+            for (int k = i - 1; k < i + 2; k++)
+                for (int l = j - 1; l < j + 2; l++)
+                    if((k >= 0 && k < GRID_SIZE) && (l >= 0 && l < GRID_SIZE))
+                        if(grid[k][l].isMine)
+                            grid[i][j].mineNbors++;                   
+
 }
