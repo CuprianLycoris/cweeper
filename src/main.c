@@ -54,6 +54,14 @@ int main(void) {
                 if (mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE) {
                     color = RED;
                 }
+            
+                if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
+                {
+                    if (mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE && grid[i][j].state == TILE_CLOSE) {
+                        grid[i][j].state = TILE_FLAG;
+                }
+                
+                }
                 DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
                 DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
             }
