@@ -20,6 +20,7 @@ typedef struct {
 #define TILE_SIZE 30
 #define WIDTH GRID_SIZE * TILE_SIZE
 #define HEIGHT GRID_SIZE * TILE_SIZE
+#define MINE_COUNT 40
 
 // Empty the playing field
 Tile grid[GRID_SIZE][GRID_SIZE] = {0};
@@ -27,6 +28,7 @@ Tile grid[GRID_SIZE][GRID_SIZE] = {0};
 void gameLoop(void);
 void drawTile(Tile* t, int posX, int posY, bool isHovered);
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered);
+void openTile(int i, int j);
 void countNbors(void);
 
 int main(void) {
@@ -35,9 +37,14 @@ int main(void) {
     InitWindow(WIDTH, HEIGHT, "minecweeper");
 
     // Prepare the game area
+    int mineCount = 0;
     for (int i = 0; i < GRID_SIZE; i++)
-        for (int j = 0; j < GRID_SIZE; j++)
-            grid[i][j].isMine = rand() % 2;
+        for (int j = 0; j < GRID_SIZE; j++){
+            if (mineCount < MINE_COUNT) {
+                grid[i][j].isMine = ((rand() % MINE_COUNT) < MINE_COUNT/3);
+                mineCount++;
+            }      
+        }
             
     countNbors();
 
@@ -66,6 +73,13 @@ void gameLoop(void) {
             int posX = i * TILE_SIZE;
             int posY = j * TILE_SIZE;
             bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
+            if (isHovered && isLeftPressed) {
+                if (t->isMine) {
+                    // Lose
+                } else {
+                    openTile(i, j);
+                }
+            }
             updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
             drawTile(t, posX, posY, isHovered);
         }
@@ -98,26 +112,52 @@ void drawTile(Tile* t, int posX, int posY, bool isHovered) {
         break;
     }
 
+    // if (t->isMine) {
+    //     color = ORANGE;
+    // } else {
+    //     color = WHITE;
+    // }
+
     if (isHovered) {
         color = RED;
     }
-        
+     
     DrawRectangle(posX, posY, TILE_SIZE, TILE_SIZE, color);
     DrawRectangleLines(posX, posY, TILE_SIZE, TILE_SIZE, BLACK);
-    char c[2];
-    if (t->state == TILE_OPEN && !t->isMine) {
-        sprintf(c, "%d", t->mineNbors);
-        DrawText(c, posX, posY, 15, BLACK);
+    if (t->mineNbors > 0) {
+        char c[2];
+        if (t->state == TILE_OPEN && !t->isMine) {
+            sprintf(c, "%d", t->mineNbors);
+            DrawText(c, posX, posY, 15, BLACK);
+        }
+        
     }
+}
+
+void openTile(int i, int j) {
+    if (!grid[i][j].isMine) {
+        grid[i][j].state = TILE_OPEN;
+    }
+    if (grid[i][j].mineNbors == 0 && !grid[i][j].isMine) {
+        for (int k = i - 1; k < i + 2; k++)
+            for (int l = j - 1; l < j + 2; l++)
+                if (!(k == i && l == j))
+                    if((k >= 0 && k < GRID_SIZE) && (l >= 0 && l < GRID_SIZE))
+                        if (grid[k][l].state != TILE_OPEN)
+                            openTile(k, l);
+    }    
 }
 
 void countNbors(void) {
   for (int i = 0; i < GRID_SIZE; i++) 
         for (int j = 0; j < GRID_SIZE; j++) 
-            if(!grid[i][j].isMine)
+            if(!grid[i][j].isMine) {
                 for (int k = i - 1; k < i + 2; k++)
                     for (int l = j - 1; l < j + 2; l++)
                         if((k >= 0 && k < GRID_SIZE) && (l >= 0 && l < GRID_SIZE))
                             if(grid[k][l].isMine)
                                 grid[i][j].mineNbors++;
+            } else {
+                grid[i][j].mineNbors = 1;
+            }
 }
