@@ -25,9 +25,8 @@ typedef struct {
 
 // Empty the playing field
 Tile grid[GRID_SIZE][GRID_SIZE] = {0};
-bool jack = off;
 
-void gameLoop(void);
+bool gameLoop(void);
 void drawTile(Tile* t, int posX, int posY, bool isHovered);
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered);
 void openTile(int i, int j);
@@ -35,9 +34,19 @@ void countNbors(void);
 
 int main(void) {
     srand((unsigned int)time(NULL));
-
+    bool jack = off;
+    int currentJack = 0;
+    float jackTimeDur = 0;
+    
+    InitAudioDevice();
     InitWindow(WIDTH, HEIGHT, "minecweeper");
-
+    
+    Texture2D jackTextures[2] = {0};
+    jackTextures[0] = LoadTexture("./assets/jack0.png");
+    jackTextures[1] = LoadTexture("./assets/jack1.png");
+    Music jackMusic = LoadMusicStream("./assets/JackTheKiller.mp3");
+    // jackMusic.looping = true;
+    
     bool permutuationArray[GRID_SIZE * GRID_SIZE] = {0};
     for (int i = 0; i < MINE_COUNT; i++){
         permutuationArray[i] = 1;
@@ -63,15 +72,40 @@ int main(void) {
             
     while (!WindowShouldClose()) {
         BeginDrawing();
-        gameLoop();
+        if (!jack){
+            // In game
+            if (!gameLoop()) {
+                jack = true;
+                PlayMusicStream(jackMusic);
+            }
+        } else {
+            UpdateMusicStream(jackMusic);
+            // Lost
+            if (jackTimeDur >= 0.1f) {
+                jackTimeDur = 0.0f;
+                currentJack = (currentJack + 1) % 2;
+            } else {
+                jackTimeDur += GetFrameTime();
+            }
+            DrawTexturePro(jackTextures[currentJack], (Rectangle) {
+                .x = 0,
+                .y = 0,
+                .width = jackTextures[currentJack].width,
+                .height = jackTextures[currentJack].height
+            }, (Rectangle) {.x = 0, .y = 0, .width = WIDTH, .height = HEIGHT}, (Vector2) {.x = 0, .y = 0}, 0, WHITE);
+        }
         EndDrawing();
     }
 
+    UnloadMusicStream(jackMusic);
+    UnloadTexture(jackTextures[0]);
+    UnloadTexture(jackTextures[1]);
+    CloseAudioDevice();
     CloseWindow();
     return 0;
 }
 
-void gameLoop(void) {
+bool gameLoop(void) {
     ClearBackground(BLACK);
     Vector2 mPos = GetMousePosition();
     int mPosX = mPos.x;
@@ -79,29 +113,24 @@ void gameLoop(void) {
     bool isLeftPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
     bool isRightPressed = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT);
 
-    if (!jack) {
-        // In game
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
-                Tile* t = &grid[i][j];
-                int posX = i * TILE_SIZE;
-                int posY = j * TILE_SIZE;
-                bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
-                if (isHovered && isLeftPressed) {
-                    if (t->isMine) {
-                        jack = true;
-                    } else {
-                        openTile(i, j);
-                    }
+    for (int i = 0; i < GRID_SIZE; i++) {
+        for (int j = 0; j < GRID_SIZE; j++) {
+            Tile* t = &grid[i][j];
+            int posX = i * TILE_SIZE;
+            int posY = j * TILE_SIZE;
+            bool isHovered = mPosX >= posX && mPosX < posX + TILE_SIZE && mPosY >= posY && mPosY < posY + TILE_SIZE;
+            if (isHovered && isLeftPressed) {
+                if (t->isMine) {
+                    return false;
+                } else {
+                    openTile(i, j);
                 }
-                updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
-                drawTile(t, posX, posY, isHovered);
             }
+            updateTile(t, posX, posY, mPosX, mPosY, isLeftPressed, isRightPressed, isHovered);
+            drawTile(t, posX, posY, isHovered);
         }
-    } else {
-        // Lose screen
-        DrawText("You lost!", WIDTH/2, HEIGHT/2 - 16, 32, WHITE);
     }
+    return true;
 }
 
 void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPressed, bool isRightPressed, bool isHovered) {
