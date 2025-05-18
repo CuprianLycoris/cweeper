@@ -1,4 +1,4 @@
-# cweeper
+# minecweeper
 Cross Platform Minesweeper in Pure C
 
 # Build Instructions

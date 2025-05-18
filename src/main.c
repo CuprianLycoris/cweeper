@@ -31,7 +31,7 @@ void updateTile(Tile* t, int posX, int posY, int mPosX, int mPosY, bool isLeftPr
 int main(void) {
     srand((unsigned int)time(NULL));
 
-    InitWindow(WIDTH, HEIGHT, "cweeper");
+    InitWindow(WIDTH, HEIGHT, "minecweeper");
 
     for (int i = 0; i < GRID_SIZE; i++)
         for (int j = 0; j < GRID_SIZE; j++)
